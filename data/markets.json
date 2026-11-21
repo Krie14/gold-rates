@@ -1,0 +1,191 @@
+{
+  "as_of": "2026-11-21",
+  "how_it_works": "Local price = international spot price x each 'gold' or 'silver' step in order. 'jewellery' steps are added only when a visitor prices jewellery. Change any pct when a law or the local market changes; negative numbers are discounts.",
+  "markets": {
+    "NP": {
+      "name": "Nepal",
+      "currency": "NPR",
+      "unit": "tola",
+      "benchmark": "FENEGOSIDA daily fine gold rate",
+      "gold": [
+        { "label": "Customs duty", "pct": 20 },
+        { "label": "Dealer and bank charges", "pct": 3.1 }
+      ],
+      "silver": [
+        { "label": "Customs duty", "pct": 20 },
+        { "label": "Dealer and bank charges", "pct": 3.4 }
+      ],
+      "jewellery": [],
+      "note": "Matches the FENEGOSIDA rate within about 1–2%. Jewellers add their making charge on top."
+    },
+    "IN": {
+      "name": "India",
+      "currency": "INR",
+      "unit": "10g",
+      "benchmark": "India bullion (IBJA-style) 24K rate",
+      "gold": [
+        { "label": "Import duty (10% BCD + 5% AIDC)", "pct": 15 },
+        { "label": "Local market discount", "pct": -7 },
+        { "label": "GST", "pct": 3 }
+      ],
+      "silver": [
+        { "label": "Import duty (10% BCD + 5% AIDC)", "pct": 15 },
+        { "label": "Local market discount", "pct": -6.5 },
+        { "label": "GST", "pct": 3 }
+      ],
+      "jewellery": [],
+      "note": "Includes 3% GST. Making charges (plus 5% GST on them) are extra."
+    },
+    "PK": {
+      "name": "Pakistan",
+      "currency": "PKR",
+      "unit": "tola",
+      "benchmark": "All-Pakistan Gems and Jewellers Sarafa Association rate",
+      "gold": [{ "label": "Sarafa market premium", "pct": 2.7 }],
+      "silver": [{ "label": "Sarafa market premium", "pct": 2.7 }],
+      "jewellery": [],
+      "note": "Follows the APGJSA daily rate closely. Making charges are extra."
+    },
+    "BD": {
+      "name": "Bangladesh",
+      "currency": "BDT",
+      "unit": "tola",
+      "unit_name": "bhori",
+      "benchmark": "BAJUS daily rate",
+      "gold": [
+        { "label": "Import costs and dealer premium", "pct": 27.7 },
+        { "label": "VAT", "pct": 5 }
+      ],
+      "silver": [
+        { "label": "Import costs and dealer premium", "pct": 27.7 },
+        { "label": "VAT", "pct": 5 }
+      ],
+      "jewellery": [],
+      "note": "1 bhori = 11.664 g. Includes VAT like the BAJUS rate. Making charges are extra."
+    },
+    "AE": {
+      "name": "United Arab Emirates",
+      "currency": "AED",
+      "unit": "g",
+      "benchmark": "Dubai Jewellery Group retail rate",
+      "gold": [{ "label": "Retail premium", "pct": 1.9 }],
+      "silver": [{ "label": "Retail premium", "pct": 4 }],
+      "jewellery": [{ "label": "VAT on jewellery", "pct": 5 }],
+      "note": "Investment gold of 99%+ purity is VAT-free; jewellery carries 5% VAT."
+    },
+    "SA": {
+      "name": "Saudi Arabia",
+      "currency": "SAR",
+      "unit": "g",
+      "benchmark": "Saudi retail gold rate",
+      "gold": [{ "label": "Retail premium", "pct": 2 }],
+      "silver": [{ "label": "Retail premium", "pct": 4 }],
+      "jewellery": [{ "label": "VAT on jewellery", "pct": 15 }],
+      "note": "Investment gold of 99%+ purity is zero-rated; jewellery carries 15% VAT."
+    },
+    "QA": {
+      "name": "Qatar",
+      "currency": "QAR",
+      "unit": "g",
+      "benchmark": "Doha retail gold rate",
+      "gold": [{ "label": "Retail premium", "pct": 2 }],
+      "silver": [{ "label": "Retail premium", "pct": 4 }],
+      "jewellery": [],
+      "note": "No VAT in Qatar."
+    },
+    "US": {
+      "name": "United States",
+      "currency": "USD",
+      "unit": "oz",
+      "benchmark": "Bullion dealer price for 1 oz bars",
+      "gold": [{ "label": "Dealer premium", "pct": 3 }],
+      "silver": [{ "label": "Dealer premium", "pct": 8 }],
+      "jewellery": [{ "label": "Sales tax (typical; varies by state)", "pct": 7 }],
+      "note": "Most states don't tax bullion. Jewellery is taxed at your state's sales tax rate."
+    },
+    "GB": {
+      "name": "United Kingdom",
+      "currency": "GBP",
+      "unit": "oz",
+      "benchmark": "Bullion dealer price for 1 oz bars",
+      "gold": [{ "label": "Dealer premium", "pct": 3 }],
+      "silver": [
+        { "label": "Dealer premium", "pct": 8 },
+        { "label": "VAT (silver bullion)", "pct": 20 }
+      ],
+      "jewellery": [{ "label": "VAT on jewellery", "pct": 20 }],
+      "note": "Investment gold is VAT-exempt. Silver bars and all jewellery carry 20% VAT."
+    },
+    "EU": {
+      "name": "Eurozone",
+      "currency": "EUR",
+      "unit": "g",
+      "benchmark": "Bullion dealer price for bars",
+      "gold": [{ "label": "Dealer premium", "pct": 3 }],
+      "silver": [
+        { "label": "Dealer premium", "pct": 8 },
+        { "label": "VAT (typical; varies by country)", "pct": 20 }
+      ],
+      "jewellery": [{ "label": "VAT (typical; varies by country)", "pct": 20 }],
+      "note": "Investment gold is VAT-exempt across the EU. VAT on silver and jewellery ranges from about 17% to 27%."
+    },
+    "CA": {
+      "name": "Canada",
+      "currency": "CAD",
+      "unit": "oz",
+      "benchmark": "Bullion dealer price for 1 oz bars",
+      "gold": [{ "label": "Dealer premium", "pct": 3 }],
+      "silver": [{ "label": "Dealer premium", "pct": 7 }],
+      "jewellery": [{ "label": "GST/HST (typical; varies by province)", "pct": 13 }],
+      "note": "Bullion of 99.5% gold or 99.9% silver is GST/HST-exempt."
+    },
+    "AU": {
+      "name": "Australia",
+      "currency": "AUD",
+      "unit": "oz",
+      "benchmark": "Bullion dealer price for 1 oz bars",
+      "gold": [{ "label": "Dealer premium", "pct": 3 }],
+      "silver": [{ "label": "Dealer premium", "pct": 7 }],
+      "jewellery": [{ "label": "GST on jewellery", "pct": 10 }],
+      "note": "Investment-grade gold and silver are GST-free."
+    },
+    "SG": {
+      "name": "Singapore",
+      "currency": "SGD",
+      "unit": "g",
+      "benchmark": "Bullion dealer price for bars",
+      "gold": [{ "label": "Dealer premium", "pct": 2.5 }],
+      "silver": [{ "label": "Dealer premium", "pct": 6 }],
+      "jewellery": [{ "label": "GST on jewellery", "pct": 9 }],
+      "note": "Investment-grade precious metals are GST-exempt."
+    },
+    "MY": {
+      "name": "Malaysia",
+      "currency": "MYR",
+      "unit": "g",
+      "benchmark": "Local dealer gold rate",
+      "gold": [{ "label": "Dealer premium", "pct": 2.5 }],
+      "silver": [{ "label": "Dealer premium", "pct": 6 }],
+      "jewellery": [],
+      "note": "Gold is not subject to sales tax in Malaysia."
+    }
+  },
+  "currency_market": {
+    "NPR": "NP", "INR": "IN", "PKR": "PK", "BDT": "BD", "AED": "AE", "SAR": "SA", "QAR": "QA",
+    "USD": "US", "GBP": "GB", "EUR": "EU", "CAD": "CA", "AUD": "AU", "SGD": "SG", "MYR": "MY"
+  },
+  "timezone_market": {
+    "Asia/Kathmandu": "NP", "Asia/Katmandu": "NP", "Asia/Kolkata": "IN", "Asia/Calcutta": "IN",
+    "Asia/Karachi": "PK", "Asia/Dhaka": "BD", "Asia/Dubai": "AE", "Asia/Riyadh": "SA", "Asia/Qatar": "QA",
+    "Europe/London": "GB", "Asia/Singapore": "SG", "Asia/Kuala_Lumpur": "MY",
+    "America/New_York": "US", "America/Chicago": "US", "America/Denver": "US", "America/Los_Angeles": "US",
+    "America/Phoenix": "US", "America/Anchorage": "US", "Pacific/Honolulu": "US",
+    "America/Toronto": "CA", "America/Vancouver": "CA", "America/Edmonton": "CA", "America/Winnipeg": "CA",
+    "America/Halifax": "CA", "America/St_Johns": "CA", "America/Regina": "CA",
+    "Australia/Sydney": "AU", "Australia/Melbourne": "AU", "Australia/Brisbane": "AU", "Australia/Perth": "AU",
+    "Australia/Adelaide": "AU", "Australia/Hobart": "AU", "Australia/Darwin": "AU",
+    "Europe/Berlin": "EU", "Europe/Paris": "EU", "Europe/Madrid": "EU", "Europe/Rome": "EU",
+    "Europe/Amsterdam": "EU", "Europe/Brussels": "EU", "Europe/Vienna": "EU", "Europe/Dublin": "EU",
+    "Europe/Lisbon": "EU", "Europe/Helsinki": "EU", "Europe/Athens": "EU"
+  }
+}
