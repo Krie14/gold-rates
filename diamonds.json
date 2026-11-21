@@ -1,0 +1,35 @@
+{
+  "as_of": "2026-11-21",
+  "source": "Reference table (indicative retail). Edit this file or set DIAMOND_FEED_URL to replace it with a licensed feed.",
+  "currency": "USD",
+  "note": "Round brilliant, GIA-graded, no strong fluorescence. Base price is per carat for G colour, VS2 clarity, Excellent cut.",
+  "spread": 0.18,
+  "natural_per_carat": [
+    { "min": 0.30, "price": 1900 },
+    { "min": 0.50, "price": 2700 },
+    { "min": 0.70, "price": 3400 },
+    { "min": 0.90, "price": 4000 },
+    { "min": 1.00, "price": 5200 },
+    { "min": 1.50, "price": 7200 },
+    { "min": 2.00, "price": 10200 },
+    { "min": 3.00, "price": 14500 },
+    { "min": 4.00, "price": 17500 },
+    { "min": 5.00, "price": 21500 }
+  ],
+  "lab_per_carat": [
+    { "min": 0.30, "price": 380 },
+    { "min": 0.50, "price": 420 },
+    { "min": 0.70, "price": 450 },
+    { "min": 0.90, "price": 480 },
+    { "min": 1.00, "price": 560 },
+    { "min": 1.50, "price": 600 },
+    { "min": 2.00, "price": 640 },
+    { "min": 3.00, "price": 720 },
+    { "min": 4.00, "price": 800 },
+    { "min": 5.00, "price": 900 }
+  ],
+  "color": { "D": 1.45, "E": 1.30, "F": 1.17, "G": 1.00, "H": 0.88, "I": 0.76, "J": 0.65, "K": 0.55 },
+  "clarity": { "FL": 1.60, "IF": 1.45, "VVS1": 1.30, "VVS2": 1.20, "VS1": 1.08, "VS2": 1.00, "SI1": 0.85, "SI2": 0.72, "I1": 0.50 },
+  "cut": { "Excellent": 1.00, "Very Good": 0.90, "Good": 0.80, "Fair": 0.65 },
+  "lab_grade_damping": 0.35
+}
