@@ -68,14 +68,14 @@ h1 { font: 500 clamp(1.6rem, 3.2vw, 2.25rem)/1.15 var(--serif); margin: 0; max-w
 .rate h2 small { display: block; font-weight: 400; color: var(--ink-soft); font-size: .85rem; margin-top: .1rem; }
 .figure {
   margin: 0;
-  font: 500 clamp(2rem, 4.4vw, 3.4rem)/1.05 var(--serif);
+  font: 500 clamp(1.7rem, 2.9vw, 2.8rem)/1.05 var(--serif);
+  white-space: nowrap;
   font-variant-numeric: tabular-nums lining-nums;
   letter-spacing: -.01em;
-  overflow-wrap: anywhere;
   border-radius: 4px;
   transition: background-color .9s ease;
 }
-.rate-gold .figure { color: var(--gold); font-size: clamp(2.4rem, 5.6vw, 4.4rem); }
+.rate-gold .figure { color: var(--gold); font-size: clamp(2.2rem, 4.4vw, 3.9rem); }
 .rate-silver .figure { color: var(--silver); }
 .rate-diamond .figure { color: var(--ice); }
 .figure.tick-up { background: rgba(31,122,77,.13); transition: none; }
@@ -83,6 +83,17 @@ h1 { font: 500 clamp(1.6rem, 3.2vw, 2.25rem)/1.15 var(--serif); margin: 0; max-w
 .change { margin: .55rem 0 0; font-size: .9rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 .change .up { color: var(--up); font-weight: 600; }
 .change .down { color: var(--down); font-weight: 600; }
+
+.market-line { margin: -0.6rem 0 1.25rem; color: var(--ink-soft); max-width: 75ch; }
+.market-line strong { color: var(--ink); font-weight: 600; }
+
+.breakdowns { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+table.breakdown { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
+.breakdown caption { text-align: left; font-weight: 600; padding: 0 0 .5rem; }
+.breakdown th, .breakdown td { padding: .6rem .9rem; border-bottom: 1px solid var(--rule); text-align: left; font-weight: 400; }
+.breakdown td { text-align: right; font-family: var(--serif); font-size: 1.05rem; white-space: nowrap; }
+.breakdown tr:last-child th, .breakdown tr:last-child td { border-bottom: 0; border-top: 2px solid var(--ink); font-weight: 600; }
+.breakdown .pct { color: var(--ink-soft); font-size: .85rem; margin-left: .3rem; }
 
 /* Blocks */
 .block { padding-block: 2rem; border-top: 1px solid var(--rule); }
@@ -139,14 +150,17 @@ table.purity { width: 100%; border-collapse: collapse; font-variant-numeric: tab
 .foot { margin-top: 2rem; background: var(--ink); color: #b9c2cc; font-size: .85rem; padding-block: 1.75rem; }
 .foot p { max-width: 80ch; margin: 0 0 .6rem; }
 .foot a { color: #fff; }
+.foot code { color: #fff; font-size: .8rem; }
 
 @media (max-width: 860px) {
   .rates { grid-template-columns: 1fr; }
   .rate + .rate { border-left: 0; border-top: 1px solid var(--rule); }
   .calcs { grid-template-columns: 1fr; }
+  .breakdowns { grid-template-columns: 1fr; }
 }
 @media (max-width: 520px) {
-  .controls { width: 100%; display: grid; grid-template-columns: 1.4fr 1fr; }
+  .controls { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+  .controls label:first-child { grid-column: 1 / -1; }
   .controls label { display: grid; gap: .2rem; min-width: 0; }
   .controls select { width: 100%; min-width: 0; }
   .fields { grid-template-columns: 1fr; }

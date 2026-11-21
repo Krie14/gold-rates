@@ -37,6 +37,19 @@ python3 -m http.server 8000
 
 Then open http://localhost:8000. To refresh the saved data by hand, run `node scripts/update-prices.mjs` (Node 18 or newer).
 
+## Country prices (local buying price)
+
+The site works out each visitor's country from their time zone, then picks that currency and the local weight unit (tola in Nepal and Pakistan, 10 g in India, troy ounces in the US and UK, and so on). Picking a different currency switches to that country's market.
+
+The local price is the international spot price with that country's costs added in order, all set in `data/markets.json`:
+
+- `gold` and `silver`: steps applied to every purchase, such as customs duty, GST and dealer premium. Negative numbers are discounts.
+- `jewellery`: extra taxes only on jewellery, such as VAT in the UAE, Saudi Arabia and the UK. The calculator also adds the making charge the visitor types in.
+
+Countries set up: Nepal, India, Pakistan, Bangladesh, UAE, Saudi Arabia, Qatar, US, UK, Eurozone, Canada, Australia, Singapore and Malaysia. Other currencies show the international spot price and say so.
+
+**Keeping it accurate:** about once a month, compare the site with your country's benchmark (for Nepal, FENEGOSIDA). If it's off by more than 1%, adjust the dealer-charges `pct` in `markets.json`. When a government changes a duty or tax, update that step's `pct`. To add a country, copy an existing entry, then add its currency to `currency_market` and its time zone to `timezone_market`.
+
 ## Diamond prices
 
 There's no free, public live feed for diamond prices. The trade benchmarks (Rapaport, IDEX and similar) are paid and licensed. This site estimates from a reference table in `data/diamonds.json`:

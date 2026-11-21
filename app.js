@@ -20,7 +20,7 @@ const PURITIES = {
   ],
 };
 
-const PREFERRED_CURRENCIES = ["USD", "EUR", "GBP", "INR", "AED", "SAR", "QAR", "KWD", "PKR", "BDT", "CAD", "AUD", "NZD", "SGD", "HKD", "MYR", "JPY", "CNY", "CHF", "ZAR", "NGN", "TRY"];
+const PREFERRED_CURRENCIES = ["USD", "EUR", "GBP", "NPR", "INR", "AED", "SAR", "QAR", "KWD", "PKR", "BDT", "CAD", "AUD", "NZD", "SGD", "HKD", "MYR", "JPY", "CNY", "CHF", "ZAR", "NGN", "TRY"];
 const REGION_CURRENCY = {
   US: "USD", GB: "GBP", IN: "INR", AE: "AED", SA: "SAR", QA: "QAR", KW: "KWD", PK: "PKR", BD: "BDT",
   CA: "CAD", AU: "AUD", NZ: "NZD", SG: "SGD", HK: "HKD", MY: "MYR", JP: "JPY", CN: "CNY", CH: "CHF",
@@ -30,6 +30,9 @@ const REGION_CURRENCY = {
 
 const state = {
   usdOz: { gold: null, silver: null },
+  markets: null,
+  market: null,
+  mode: "local",
   fx: null,
   currency: "USD",
   unit: "g",
@@ -43,6 +46,26 @@ const state = {
 };
 
 const $ = (id) => document.getElementById(id);
+
+/* ---------- country markets ---------- */
+const marketInfo = (key = state.market) => (key && state.markets && state.markets.markets[key]) || null;
+const activeMarket = () => (state.mode === "local" ? marketInfo() : null);
+const marketSteps = (metal, jewellery = false) => {
+  const m = activeMarket();
+  if (!m) return [];
+  return [...(m[metal] || []), ...(jewellery ? m.jewellery || [] : [])];
+};
+const marketFactor = (metal, jewellery = false) =>
+  marketSteps(metal, jewellery).reduce((f, step) => f * (1 + step.pct / 100), 1);
+const marketForCurrency = (code) => (state.markets && state.markets.currency_market[code]) || null;
+const unitName = (unit) => {
+  const m = marketInfo();
+  if (unit === "tola" && m && m.unit_name) return m.unit_name;
+  return { g: "gram", "10g": "10 g", tola: "tola", oz: "troy oz", kg: "kg" }[unit];
+};
+const unitLabel = (unit) => `per ${unitName(unit)}`;
+const lowerFirst = (text) => (/^[A-Z][a-z]/.test(text) ? text[0].toLowerCase() + text.slice(1) : text);
+const listText = (items) => items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
 
 /* ---------- storage (best effort) ---------- */
 const prefs = {
@@ -115,9 +138,13 @@ const pricePerGram = (metal) => {
   return isPrice(usd) && r ? (usd / TROY_OZ_G) * r : null;
 };
 
-const priceFor = (metal, unit, factor = 1) => {
+const spotFor = (metal, unit, factor = 1) => {
   const g = pricePerGram(metal);
   return g == null ? null : g * GRAMS[unit] * factor;
+};
+const priceFor = (metal, unit, factor = 1, jewellery = false) => {
+  const spot = spotFor(metal, unit, factor);
+  return spot == null ? null : spot * marketFactor(metal, jewellery);
 };
 
 /* ---------- diamonds ---------- */
@@ -167,11 +194,11 @@ const renderBoard = (previousUsd = {}) => {
     const changeEl = $(`${metal}-change`);
     const close = lastClose(metal);
     const now = state.usdOz[metal];
-    const label = UNIT_LABEL[state.unit];
+    const label = unitLabel(state.unit);
     if (isPrice(close) && isPrice(now) && rate()) {
       const diffUsd = now - close;
       const pct = (diffUsd / close) * 100;
-      const diffLocal = (diffUsd / TROY_OZ_G) * GRAMS[state.unit] * rate();
+      const diffLocal = (diffUsd / TROY_OZ_G) * GRAMS[state.unit] * rate() * marketFactor(metal);
       const cls = diffUsd >= 0 ? "up" : "down";
       const sign = diffUsd >= 0 ? "+" : "−";
       changeEl.innerHTML = `${label}. <span class="${cls}">${sign}${money(Math.abs(diffLocal))} (${sign}${Math.abs(pct).toFixed(2)}%)</span> since the last close`;
@@ -185,6 +212,12 @@ const renderBoard = (previousUsd = {}) => {
 
 const renderPurity = () => {
   const units = ["g", "10g", "tola", "oz"];
+  const heads = document.querySelectorAll(".purity thead th");
+  if (heads.length === 5) heads[3].textContent = `Per ${unitName("tola")}`;
+  const m = activeMarket();
+  $("purity-lede").textContent = m
+    ? `${m.name} buying prices for bars, coins and the metal in jewellery. Making charges are extra.`
+    : "International spot value of the metal itself, before local taxes, dealer premiums and making charges.";
   const rows = [];
   for (const metal of ["gold", "silver"]) {
     PURITIES[metal].forEach((p, i) => {
@@ -202,8 +235,27 @@ const renderMetalCalc = () => {
   const purity = PURITIES[metal].find((p) => p.id === $("mc-purity").value) || PURITIES[metal][0];
   const weight = parseFloat($("mc-weight").value);
   const unit = $("mc-unit").value;
-  const value = weight > 0 ? priceFor(metal, unit, purity.factor * weight) : null;
-  $("mc-result").textContent = money(value);
+  const jewellery = $("mc-kind").value === "jewellery";
+  $("mc-making-field").hidden = !jewellery;
+  const making = jewellery ? Math.max(0, parseFloat($("mc-making").value) || 0) : 0;
+
+  const metalValue = weight > 0 ? priceFor(metal, unit, purity.factor * weight) : null;
+  if (metalValue == null) { $("mc-result").textContent = "—"; $("mc-detail").textContent = ""; return; }
+
+  const makingValue = metalValue * (making / 100);
+  const m = activeMarket();
+  const extra = jewellery && m ? m.jewellery || [] : [];
+  let total = metalValue + makingValue;
+  const parts = [`Metal ${money(metalValue)}`];
+  if (making) parts.push(`making charge ${making}% ${money(makingValue)}`);
+  for (const step of extra) {
+    const add = total * (step.pct / 100);
+    parts.push(`${lowerFirst(step.label)} ${step.pct}% ${money(add)}`);
+    total += add;
+  }
+  $("mc-result").textContent = money(total);
+  $("mc-result-label").textContent = state.mode === "local" && m ? "You'd pay about" : "Spot value";
+  $("mc-detail").textContent = parts.length > 1 ? `${parts.join(" + ")}.` : (m ? "Includes local duty, taxes and dealer premium." : "");
 };
 
 const fillPurityOptions = () => {
@@ -239,7 +291,7 @@ const chartPoints = () => {
   const last = new Date(pts[pts.length - 1].d + "T00:00:00Z");
   const cutoff = new Date(last.getTime() - state.chartRange * 86400000).toISOString().slice(0, 10);
   const r = rate() || 1;
-  const k = (GRAMS[state.unit] / TROY_OZ_G) * r;
+  const k = (GRAMS[state.unit] / TROY_OZ_G) * r * marketFactor(metal);
   const inRange = pts.filter((p) => p.d >= cutoff).map((p) => ({ d: p.d, v: p[metal] * k }));
   // Today's live price extends the line to now.
   const today = new Date().toISOString().slice(0, 10);
@@ -313,8 +365,9 @@ const renderChart = () => {
   const last = pts[pts.length - 1].v;
   const pct = ((last - first) / first) * 100;
   $("chart-summary").textContent =
-    `${metalName} ${UNIT_LABEL[state.unit]} moved ${pct >= 0 ? "up" : "down"} ${Math.abs(pct).toFixed(1)}% from ${money(first)} to ${money(last)} between ${dateLabel(pts[0].d, true)} and ${dateLabel(pts[pts.length - 1].d, true)}.` +
-    (state.currency !== "USD" ? ` Converted at today's exchange rate.` : "");
+    `${metalName} ${unitLabel(state.unit)} moved ${pct >= 0 ? "up" : "down"} ${Math.abs(pct).toFixed(1)}% from ${money(first)} to ${money(last)} between ${dateLabel(pts[0].d, true)} and ${dateLabel(pts[pts.length - 1].d, true)}.` +
+    [state.currency !== "USD" ? " Converted at today's exchange rate." : "",
+     activeMarket() ? ` Past prices use today's ${activeMarket().name} taxes and premiums.` : ""].join("");
 
   const svg = box.querySelector("svg");
   const zone = $("hover-zone");
@@ -351,7 +404,47 @@ const setStatus = (kind, text) => {
   el.textContent = text;
 };
 
+const renderMarketLine = () => {
+  const m = activeMarket();
+  const info = marketInfo();
+  const el = $("market-line");
+  if (m) {
+    el.innerHTML = `<strong>${m.name} buying price</strong>, including ${listText(m.gold.filter((s) => s.pct > 0).map((s) => lowerFirst(s.label)))}. Compare with: ${m.benchmark}.`;
+  } else if (state.mode === "spot") {
+    el.innerHTML = `<strong>International spot price</strong>, before local duty, taxes and dealer premiums.${info ? ` Switch Price to “Local price” for ${info.name}.` : ""}`;
+  } else {
+    el.innerHTML = `<strong>International spot price.</strong> Local taxes aren't set up for ${state.currency} yet, so add your local duty and dealer premium on top.`;
+  }
+};
+
+const breakdownRows = (metal) => {
+  const spot = spotFor(metal, state.unit);
+  if (spot == null) return "";
+  let running = spot;
+  const rows = [`<tr><th scope="row">International spot</th><td>${money(spot)}</td></tr>`];
+  for (const step of marketSteps(metal)) {
+    const add = running * (step.pct / 100);
+    running += add;
+    const sign = add < 0 ? "−" : "+";
+    rows.push(`<tr><th scope="row">${step.label}<span class="pct">${step.pct > 0 ? "+" : ""}${step.pct}%</span></th><td>${sign}${money(Math.abs(add))}</td></tr>`);
+  }
+  rows.push(`<tr><th scope="row">${metal === "gold" ? "Gold" : "Silver"} buying price</th><td>${money(running)}</td></tr>`);
+  return `<caption>${metal === "gold" ? "Gold, 24 karat" : "Silver, 999 fine"}, ${unitLabel(state.unit)}</caption>${rows.join("")}`;
+};
+
+const renderBreakdown = () => {
+  const m = activeMarket();
+  $("breakdown-block").hidden = !m;
+  if (!m) return;
+  $("breakdown-title").textContent = `How today's ${m.name} price is made up`;
+  $("breakdown-lede").textContent = m.note;
+  $("breakdown-gold").innerHTML = breakdownRows("gold");
+  $("breakdown-silver").innerHTML = breakdownRows("silver");
+};
+
 const renderAll = (previousUsd) => {
+  renderMarketLine();
+  renderBreakdown();
   renderBoard(previousUsd);
   renderPurity();
   renderMetalCalc();
@@ -396,14 +489,37 @@ const fillCurrencies = () => {
   $("currency").innerHTML =
     `<optgroup label="Common">${preferred.map(opt).join("")}</optgroup>` +
     (rest.length ? `<optgroup label="All currencies">${rest.map(opt).join("")}</optgroup>` : "");
-  if (!available.includes(state.currency)) state.currency = "USD";
+  if (!available.includes(state.currency)) applyCurrency("USD", { resetUnit: true });
   $("currency").value = state.currency;
 };
 
-const guessCurrency = () => {
+const detectCurrency = () => {
+  // Time zone is the best signal: many people use an "en-US" browser outside the US.
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const key = state.markets && state.markets.timezone_market[tz];
+    if (key) return state.markets.markets[key].currency;
+  } catch { /* older browsers */ }
   const lang = (navigator.languages && navigator.languages[0]) || navigator.language || "en-US";
-  const region = lang.split("-")[1];
-  return (region && REGION_CURRENCY[region.toUpperCase()]) || "USD";
+  const region = (lang.split("-")[1] || "").toUpperCase();
+  if (region === "NP") return "NPR";
+  return REGION_CURRENCY[region] || "USD";
+};
+
+const applyCurrency = (code, { resetUnit = false } = {}) => {
+  state.currency = code;
+  state.market = marketForCurrency(code);
+  prefs.set("currency", code);
+  const m = marketInfo();
+  if (resetUnit && m && GRAMS[m.unit]) {
+    state.unit = m.unit;
+    $("unit").value = m.unit;
+    prefs.set("unit", m.unit);
+  }
+  const tolaOpt = $("unit").querySelector('option[value="tola"]');
+  if (tolaOpt) tolaOpt.textContent = unitLabel("tola");
+  const mcTola = $("mc-unit").querySelector('option[value="tola"]');
+  if (mcTola) mcTola.textContent = unitName("tola");
 };
 
 const fillDiamondOptions = () => {
@@ -416,10 +532,11 @@ const fillDiamondOptions = () => {
 };
 
 const bindEvents = () => {
-  $("currency").addEventListener("change", (e) => { state.currency = e.target.value; prefs.set("currency", state.currency); renderAll(); });
+  $("currency").addEventListener("change", (e) => { applyCurrency(e.target.value, { resetUnit: true }); renderAll(); });
+  $("mode").addEventListener("change", (e) => { state.mode = e.target.value; prefs.set("mode", state.mode); renderAll(); });
   $("unit").addEventListener("change", (e) => { state.unit = e.target.value; prefs.set("unit", state.unit); renderAll(); });
   $("mc-metal").addEventListener("change", () => { fillPurityOptions(); renderMetalCalc(); });
-  ["mc-purity", "mc-weight", "mc-unit"].forEach((id) => $(id).addEventListener("input", renderMetalCalc));
+  ["mc-purity", "mc-weight", "mc-unit", "mc-kind", "mc-making"].forEach((id) => $(id).addEventListener("input", renderMetalCalc));
   ["dc-carat", "dc-color", "dc-clarity", "dc-cut", "dc-origin"].forEach((id) => $(id).addEventListener("input", renderDiamondCalc));
 
   document.querySelectorAll("[data-metal]").forEach((b) => b.addEventListener("click", () => {
@@ -442,17 +559,22 @@ const bindEvents = () => {
 };
 
 const init = async () => {
-  state.currency = prefs.get("currency") || guessCurrency();
-  state.unit = GRAMS[prefs.get("unit")] ? prefs.get("unit") : "g";
-  $("unit").value = state.unit;
   fillPurityOptions();
   bindEvents();
 
-  const [prices, history, diamonds] = await Promise.allSettled([
+  const [prices, history, diamonds, markets] = await Promise.allSettled([
     getJson("data/prices.json", { fresh: true }),
     getJson("data/history.json", { fresh: true }),
     getJson("data/diamonds.json", { fresh: true }),
+    getJson("data/markets.json", { fresh: true }),
   ]);
+  if (markets.status === "fulfilled") state.markets = markets.value;
+
+  state.mode = prefs.get("mode") === "spot" ? "spot" : "local";
+  $("mode").value = state.mode;
+  const savedUnit = prefs.get("unit");
+  applyCurrency(prefs.get("currency") || detectCurrency(), { resetUnit: !savedUnit });
+  if (savedUnit && GRAMS[savedUnit]) { state.unit = savedUnit; $("unit").value = savedUnit; }
 
   if (prices.status === "fulfilled") {
     const p = prices.value;
