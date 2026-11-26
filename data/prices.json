@@ -1,9 +1,9 @@
 {
-  "updated_at": "2026-11-25T08:39:32.506Z",
-  "metals_as_of": "2026-11-25T08:39:15Z",
+  "updated_at": "2026-11-26T08:23:29.363Z",
+  "metals_as_of": "2026-11-26T08:23:17Z",
   "source": "gold-api.com",
-  "gold_usd_oz": 3528.6,
-  "silver_usd_oz": 40.2,
+  "gold_usd_oz": 3565.6,
+  "silver_usd_oz": 41.09,
   "fx_as_of": "Wed, 25 Nov 2026 00:02:31 +0000",
   "fx": {
     "USD": 1,
